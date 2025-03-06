@@ -17,16 +17,20 @@ public class Controller implements ActionListener {
 
     public void askWord(){
         enterGuess = JOptionPane.showInputDialog(null, "Enter a 5 letter word.");
-        enterGuess.toLowerCase();
+
         if (enterGuess.length() != 5){
-            throw new IllegalArgumentException("Word must be 5 letters.");
+            while (enterGuess.length() != 5) {
+                enterGuess = JOptionPane.showInputDialog(null, "Word must be 5 letters.\nEnter a 5 letter word.");
+                if (enterGuess == null) System.exit(0);
+            }
         }
+        enterGuess = enterGuess.toLowerCase();
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         String[] position = e.getActionCommand().split(" ");
         String w = JOptionPane.showInputDialog(null, "Enter a letter.");
-        model.setValue(Integer.parseInt(position[0]), Integer.parseInt(position[1]), w);
+        model.notifyViews(Integer.parseInt(position[0]), Integer.parseInt(position[1]), w);
     }
 }

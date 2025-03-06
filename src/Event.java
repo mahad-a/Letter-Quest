@@ -1,7 +1,7 @@
 import java.util.EventObject;
 
 public class Event extends EventObject {
-    Model.Status status;
+    Status status;
     int x;
     int y;
     String guess;

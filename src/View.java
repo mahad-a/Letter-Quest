@@ -6,8 +6,8 @@ import java.awt.event.ActionListener;
 public class View implements ModelView{
     Model model;
     Controller controller;
-    JButton buttons[][];
-    JTextField input;
+    JButton[][] buttons;
+
     public View(){
         JFrame frame = new JFrame();
         frame.setLayout(new GridLayout(5,5));
@@ -19,10 +19,42 @@ public class View implements ModelView{
         controller = new Controller(model);
         buttons = new JButton[5][5];
 
+        JMenuBar menuBar = new JMenuBar();
+        JMenu menu = new JMenu("Options");
+        menuBar.add(menu);
+        JMenuItem newGame = new JMenuItem("New game");
+        menu.add(newGame);
+
+        newGame.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                startNewGame();
+            }
+        });
+
         controller.askWord();
 
-        JTextField input = new JTextField();
+        setUpGame(frame);
 
+        frame.setVisible(true);
+        frame.setJMenuBar(menuBar);
+    }
+
+    private void startNewGame() {
+        model = new Model();
+        controller = new Controller(model);
+        controller.askWord();
+
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 5; j++) {
+                buttons[i][j].setText("");
+                buttons[i][j].setEnabled(true);
+                buttons[i][j].setBackground(null);
+            }
+        }
+    }
+
+    public void setUpGame(JFrame frame){
         for(int i = 0; i < 5; i++){
             for (int j = 0; j < 5; j++){
                 JButton button = new JButton(" ");
@@ -31,18 +63,13 @@ public class View implements ModelView{
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         String[] position = e.getActionCommand().split(" ");
-                        String w = JOptionPane.showInputDialog(null, "Enter your guess.");
-                        //model.setValue(Integer.parseInt(position[0]), Integer.parseInt(position[1]), w);
-                        if (buttons[0][0].isEnabled()) {
-                            checkGuess(0, w);
-                        } else if (buttons[1][0].isEnabled()) {
-                            checkGuess(1, w);
-                        } else if (buttons[2][0].isEnabled()) {
-                            checkGuess(2, w);
-                        } else if (buttons[3][0].isEnabled()) {
-                            checkGuess(3, w);
-                        } else if (buttons[4][0].isEnabled()) {
-                            checkGuess(4, w);
+                        String w = (JOptionPane.showInputDialog(null, "Enter your guess.")).toLowerCase();
+
+                        for (int i = 0; i < 5; i++) {
+                            if (buttons[i][0].isEnabled()) {
+                                checkGuess(i, w);
+                                break;
+                            }
                         }
                     }
                 });
@@ -50,9 +77,6 @@ public class View implements ModelView{
                 frame.add(button);
             }
         }
-        // frame.add(input);
-
-        frame.setVisible(true);
     }
 
     public void correctGuess(int row, int col, String text){
@@ -65,73 +89,56 @@ public class View implements ModelView{
         buttons[row][col].setBackground(Color.YELLOW);
     }
 
-    public void checkGuess(int row, String text){
+    public void checkGuess(int row, String text) {
         int count = 0;
-        buttons[row][0].setText((String.valueOf(text.charAt(0))));
-        buttons[row][0].setEnabled(false);
-        if (controller.getEnterGuess().charAt(0) == ((text.charAt(0)))){
-            correctGuess(row, 0, (String.valueOf(text.charAt(0))));
-            count++;
+        String answer = controller.getEnterGuess();
+        boolean[] matched = new boolean[5];
+
+        if (text.length() < 5) {
+            text = text + "?".repeat(5 - text.length());
         }
-        buttons[row][1].setText((String.valueOf(text.charAt(1))));
-        buttons[row][1].setEnabled(false);
-        if (controller.getEnterGuess().charAt(1) == ((text.charAt(1)))) {
-            correctGuess(row, 1, (String.valueOf(text.charAt(1))));
-            count++;
-        }
-        buttons[row][2].setText((String.valueOf(text.charAt(2))));
-        buttons[row][2].setEnabled(false);
 
-        if (controller.getEnterGuess().charAt(2) == ((text.charAt(2)))) {
-            correctGuess(row, 2, (String.valueOf(text.charAt(2))));
-            count++;
+        for (int i = 0; i < 5; i++) {
+            buttons[row][i].setText(String.valueOf(text.charAt(i)));
+            buttons[row][i].setEnabled(false);
 
-        }
-        buttons[row][3].setText((String.valueOf(text.charAt(3))));
-        buttons[row][3].setEnabled(false);
-
-        if (controller.getEnterGuess().charAt(3) == ((text.charAt(3)))) {
-            correctGuess(row, 3, (String.valueOf(text.charAt(3))));
-            count++;
-
-        }
-        buttons[row][4].setText((String.valueOf(text.charAt(4))));
-        buttons[row][4].setEnabled(false);
-
-        if (controller.getEnterGuess().charAt(4) == ((text.charAt(4)))) {
-            correctGuess(row, 4, (String.valueOf(text.charAt(4))));
-            count++;
-
-        }
-        int i = 5;
-        while (i > 0) {
-            if (controller.getEnterGuess().charAt(i) == ((text.charAt(0)))) {
-                misplacedGuess(row, 0, (String.valueOf(text.charAt(0))));
+            if (answer.charAt(i) == text.charAt(i)) {
+                correctGuess(row, i, String.valueOf(text.charAt(i)));
+                matched[i] = true;
+                count++;
             }
-
-            if (controller.getEnterGuess().charAt(i) == ((text.charAt(1)))) {
-                misplacedGuess(row, 1, (String.valueOf(text.charAt(1))));
-            }
-
-            if (controller.getEnterGuess().charAt(i) == ((text.charAt(2)))) {
-                misplacedGuess(row, 2, (String.valueOf(text.charAt(2))));
-            }
-
-            if (controller.getEnterGuess().charAt(i) == ((text.charAt(3)))) {
-                misplacedGuess(row, 3, (String.valueOf(text.charAt(3))));
-            }
-
-            if (controller.getEnterGuess().charAt(i) == ((text.charAt(4)))) {
-                misplacedGuess(row, 4, (String.valueOf(text.charAt(4))));
-            }
-            i++;
         }
-        if (count >= 5){
-            //Object q = JOptionPane.showMessageDialog((Component) null, "Congrats!", "Victory", 3);
+
+        for (int i = 0; i < 5; i++) {
+            if (matched[i]) continue;
+
+            for (int j = 0; j < 5; j++) {
+                if (i != j && !matched[j] && text.charAt(i) == answer.charAt(j)) {
+                    misplacedGuess(row, i, String.valueOf(text.charAt(i)));
+                    break;
+                }
+            }
+        }
+
+        if (count == 5) {
+            JOptionPane.showMessageDialog(null, "Congrats! You guessed the word.");
+            disableAllButtons();
+            return;
+        }
+
+        if (row == 4) {
+            JOptionPane.showMessageDialog(null, ("Failed! You didn't guessed the word. The word was " + answer));
+            disableAllButtons();
         }
     }
 
-
+    public void disableAllButtons() {
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 5; j++) {
+                buttons[i][j].setEnabled(false);
+            }
+        }
+    }
 
     @Override
     public void handleStatusUpdate(Event e){
