@@ -11,7 +11,7 @@ public class View implements ModelView{
     public View(){
         JFrame frame = new JFrame();
         frame.setLayout(new GridLayout(5,5));
-        frame.setTitle("Guess it!");
+        frame.setTitle("Letter Quest");
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setSize(500, 500);
 
